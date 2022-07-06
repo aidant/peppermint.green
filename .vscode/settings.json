@@ -1,0 +1,11 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": false
+  },
+  "svelte.plugin.svelte.format.config.printWidth": 100,
+  "svelte.plugin.svelte.format.config.singleQuote": true,
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "javascript.preferences.importModuleSpecifierEnding": "minimal",
+  "files.insertFinalNewline": true
+}
