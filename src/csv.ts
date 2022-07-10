@@ -5,10 +5,18 @@ export class CSVDecoder {
   #currentValue = ''
   #currentRecord: string[] = []
 
-  #action(action: 'iterate' | 'commit-character' | 'uncommit-character' | 'commit-value'): null
+  #action(
+    action: 'iterate' | 'commit-character' | 'uncommit-character' | 'commit-value' | 'reset'
+  ): null
   #action(action: 'commit-record'): string[]
   #action(
-    action: 'iterate' | 'commit-character' | 'uncommit-character' | 'commit-value' | 'commit-record'
+    action:
+      | 'iterate'
+      | 'commit-character'
+      | 'uncommit-character'
+      | 'commit-value'
+      | 'commit-record'
+      | 'reset'
   ): null | string[]
   #action(
     action:
@@ -73,26 +81,13 @@ export class CSVDecoder {
   }
 
   decodeCharacter(character: string | null): string[] | null {
-    this.#currentCharacter = character
-
-    console.log(
-      JSON.stringify(
-        {
-          isInQuote: this.#isInQuote,
-          currentCharacter: this.#currentCharacter,
-          previousCharacter: this.#previousCharacter,
-          currentValue: this.#currentValue,
-          currentRecord: this.#currentRecord,
-        },
-        null,
-        2
-      )
-    )
+    this.#currentCharacter = character!
 
     if (character === null) {
       if (this.#previousCharacter) {
         return this.#action('commit-record')
       } else {
+        return this.#action('reset')
       }
     }
 
@@ -126,11 +121,13 @@ export class CSVDecoder {
       return this.#action('iterate')
     }
 
+    // quote
     if (!this.#isInQuote && this.#currentCharacter === '"') {
       this.#isInQuote = true
       return this.#action('iterate')
     }
 
+    // comma
     if (!this.#isInQuote && this.#currentCharacter === ',') {
       return this.#action('commit-value')
     }
