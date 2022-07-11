@@ -1,5 +1,3 @@
-declare var self: ServiceWorkerGlobalScope
-
 self.addEventListener('install', (event) => {
   self.skipWaiting()
 })

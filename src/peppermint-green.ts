@@ -2,7 +2,7 @@ import PeppermintGreen from './peppermint-green.svelte'
 import './peppermint-green.css'
 
 addEventListener('load', () => {
-  navigator.serviceWorker.register(new URL('./service-worker.ts', import.meta.url).href)
+  navigator.serviceWorker.register(new URL('./service-worker.js', import.meta.url).href)
 
   new PeppermintGreen({
     target: document.body,
