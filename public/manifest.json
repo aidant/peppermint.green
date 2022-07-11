@@ -1,0 +1,16 @@
+{
+  "name": "peppermint green",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "150x150"
+    }
+  ],
+  "_start_url": "https://aidant.github.io/peppermint.green/",
+  "start_url": "http://localhost:3000/",
+  "background_color": "hsl(130 15% 10%)",
+  "display": "fullscreen",
+  "display_override": ["fullscreen"],
+  "theme_color": "hsl(130 15% 25%)"
+}
