@@ -10,6 +10,7 @@ export default defineConfig({
     outDir: '../build',
     assetsDir: '.',
     emptyOutDir: true,
+    assetsInlineLimit: 0,
   },
   plugins: [
     svelte({
