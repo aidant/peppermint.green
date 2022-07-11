@@ -1,8 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
   "name": "peppermint green",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "./favicon.svg",
       "type": "image/svg+xml",
       "sizes": "150x150"
     }
