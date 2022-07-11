@@ -7,8 +7,8 @@
       "sizes": "150x150"
     }
   ],
-  "_start_url": "https://aidant.github.io/peppermint.green/",
-  "start_url": "http://localhost:3000/",
+  "start_url": "https://aidant.github.io/peppermint.green/",
+  "_start_url": "http://localhost:3000/",
   "background_color": "hsl(130 15% 10%)",
   "display": "fullscreen",
   "display_override": ["fullscreen"],
