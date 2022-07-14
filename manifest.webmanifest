@@ -1,0 +1,1 @@
+{"name":"peppermint green","short_name":"peppermint green","start_url":"./","display":"standalone","background_color":"hsl(130 15% 10%)","lang":"en","scope":"./","icons":[{"src":"./favicon.svg","type":"image/svg+xml","sizes":"1024x1024"}],"display_override":["standalone"],"theme_color":"hsl(130 15% 25%)"}
