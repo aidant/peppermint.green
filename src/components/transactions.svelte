@@ -1,6 +1,6 @@
 <div class="flex flex-col flex-auto overflow-hidden relative">
   <menu
-    class="shrink-0 [min-block-size:fit-content] overflow-x-audo overflow-y-hidden overscroll-x-contain snap-x snap-mandatory"
+    class="shrink-0 [min-block-size:fit-content] overflow-x-audo overflow-y-hidden overscroll-x-contain snap-x snap-mandatory scroll-smooth"
   >
     <ul class="flex flex-row justify-between px-6 py-4">
       <li class="snap-start inline-flex items-center whitespace-nowrap">
@@ -150,7 +150,7 @@
     </ul>
   </menu>
   <div
-    class="[block-size:100%] grid grid-flow-col [grid-auto-columns:100%] overflow-x-audo overflow-y-hidden overscroll-x-contain snap-x snap-mandatory flex-grow gap-4"
+    class="[block-size:100%] grid grid-flow-col [grid-auto-columns:100%] overflow-x-audo overflow-y-hidden overscroll-x-contain snap-x snap-mandatory scroll-smooth flex-grow gap-4"
   >
     <div
       id="incomming"
