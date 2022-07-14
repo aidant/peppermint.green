@@ -116,14 +116,8 @@ export class CSVDecoder {
     }
 
     // quote
-    if (this.#isInQuote && this.#currentCharacter === '"') {
-      this.#isInQuote = false
-      return this.#action('iterate')
-    }
-
-    // quote
-    if (!this.#isInQuote && this.#currentCharacter === '"') {
-      this.#isInQuote = true
+    if (this.#currentCharacter === '"') {
+      this.#isInQuote = !this.#isInQuote
       return this.#action('iterate')
     }
 
