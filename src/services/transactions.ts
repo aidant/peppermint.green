@@ -1,19 +1,10 @@
 import { openDB as createDatabase, type DBSchema as DatabaseSchema } from 'idb'
-import {
-  combineLatest,
-  combineLatestWith,
-  from,
-  map,
-  of,
-  pairwise,
-  scan,
-  startWith,
-  switchMap,
-  type Observable,
-} from 'rxjs'
+import { combineLatest, from, of, scan, switchMap, type Observable } from 'rxjs'
 import { normalizeValue } from '../api'
-import { observeUserPreferences } from './user-preferences'
+import { observeAccounts } from './accounts'
+import { createObservableNotification } from './create-observable-notification'
 import { getCurrencyConversion } from './currency-conversions'
+import { observeUserPreferences } from './user-preferences'
 
 export interface Transaction {
   transactionId: string
@@ -43,6 +34,10 @@ interface TransactionSchema extends DatabaseSchema {
   }
 }
 
+export const [observeTransactionsNotification, notifyTransactions] = createObservableNotification(
+  'peppermint.green#transactions'
+)
+
 const db = await createDatabase<TransactionSchema>('peppermint.green#transactions', 1, {
   upgrade(db) {
     const transactionStore = db.createObjectStore('transactions', { keyPath: 'transactionId' })
@@ -57,6 +52,7 @@ export const createTransaction = async (
 ): Promise<Transaction> => {
   const value = { transactionId: crypto.randomUUID(), ...transaction }
   await db.add('transactions', value)
+  notifyTransactions(`transactions:${value.transactionId}`)
   return value
 }
 
@@ -86,14 +82,19 @@ export const getTransactions = async function* ({
 export const observeTransactions = (
   filter: TransactionFilter
 ): Observable<{ transactions: Record<string, Transaction>; updated: string[] }> => {
-  return observeUserPreferences().pipe(
-    switchMap(($userPreferences) =>
+  return combineLatest([
+    observeUserPreferences(),
+    observeAccounts(),
+    observeTransactionsNotification('transactions:'),
+  ]).pipe(
+    switchMap(([$userPreferences, $accounts]) =>
       combineLatest({
         userPreferences: of($userPreferences),
+        accounts: of($accounts),
         transaction: from(getTransactions(filter)),
       })
     ),
-    switchMap(async ({ userPreferences, transaction }) => {
+    switchMap(async ({ userPreferences, accounts, transaction }) => {
       let multiplier: number | undefined
 
       if (transaction.transactionCurrency !== userPreferences.userCurrency) {

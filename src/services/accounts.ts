@@ -1,4 +1,6 @@
 import { openDB as createDatabase, type DBSchema as DatabaseSchema } from 'idb'
+import { switchMap, type Observable } from 'rxjs'
+import { createObservableNotification } from './create-observable-notification'
 
 export interface Account {
   accountId: string
@@ -15,6 +17,10 @@ interface AccountSchema extends DatabaseSchema {
   }
 }
 
+export const [observeAccountsNotification, notifyAccounts] = createObservableNotification(
+  'peppermint.green#accounts'
+)
+
 const db = await createDatabase<AccountSchema>('peppermint.green#accounts', 1, {
   upgrade(db) {
     const accountsStore = db.createObjectStore('accounts', { keyPath: 'accountId' })
@@ -24,7 +30,12 @@ const db = await createDatabase<AccountSchema>('peppermint.green#accounts', 1, {
 export const createAccount = async (account: Omit<Account, 'accountId'>): Promise<Account> => {
   const value = { accountId: crypto.randomUUID(), ...account }
   await db.add('accounts', value)
+  notifyAccounts(`accounts:${value.accountId}`)
   return value
+}
+
+export const getAccount = async (accountId: string): Promise<Account | undefined> => {
+  return db.get('accounts', accountId)
 }
 
 export const getAccounts = async (): Promise<Account[]> => {
@@ -33,9 +44,16 @@ export const getAccounts = async (): Promise<Account[]> => {
 
 export const updateAccount = async (account: Account): Promise<Account> => {
   await db.put('accounts', account)
+  notifyAccounts(`accounts:${account.accountId}`)
   return account
 }
 
-export const deleteAccount = async (accountId: string): Promise<void> => {
-  await db.delete('accounts', accountId)
+export const observeAccounts = (): Observable<Account[]> => {
+  return observeAccountsNotification('accounts:').pipe(switchMap(() => getAccounts()))
+}
+
+export const observeAccount = <A extends string>(accountId: A): Observable<Account | undefined> => {
+  return observeAccountsNotification(`accounts:${accountId}`).pipe(
+    switchMap(() => getAccount(accountId))
+  )
 }
