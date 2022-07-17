@@ -1,42 +1,34 @@
-const APU_URL = 'https://api.peppermint.green'
+export const normalizeValue = <
+  V extends string,
+  S extends string,
+  Value extends Record<V | S, number>
+>(
+  value: Value,
+  {
+    valueProperty,
+    scaleProperty,
+    scale,
+    multiplier,
+    precision,
+  }: { valueProperty: V; scaleProperty: S; scale: number; multiplier?: number; precision?: number }
+): Value => {
+  value = Object.assign(Object.create(null), value)
 
-const request = async <T>(
-  method: 'GET' | 'POST',
-  path: string,
-  params?: Record<string, string>,
-  body?: object,
-  headers?: Record<string, string>
-): Promise<T> => {
-  const url = new URL(path, APU_URL)
+  // @ts-expect-error
+  value[valueProperty] = value[valueProperty] / Math.pow(10, value[scaleProperty] - scale)
+  // @ts-expect-error
+  value[scaleProperty] = scale
 
-  for (const param in params) {
-    url.searchParams.set(param, params[param])
+  if (typeof multiplier === 'number') {
+    // @ts-expect-error
+    value[valueProperty] = value[valueProperty] * multiplier
   }
 
-  const request: RequestInit = {
-    method,
-    headers: {
-      ...headers,
-      Accept: 'application/json',
-    },
+  if (typeof precision === 'number') {
+    // @ts-expect-error
+    value[valueProperty] =
+      Math.round(value[valueProperty] * Math.pow(10, precision)) / Math.pow(10, precision)
   }
 
-  if (body) {
-    request.body = JSON.stringify(body, null, 2)
-    request.headers['Content-Type'] = 'application/json; charset=utf-8'
-  }
-
-  const response = await fetch(url.href, request)
-  const json = await response.json()
-  if (response.ok) {
-    return json
-  } else {
-    throw json
-  }
-}
-
-export interface Transaction {}
-
-export const getTransactions = async (): Promise<Transaction[]> => {
-  return request<Transaction[]>('GET', '/transactions')
+  return value
 }
