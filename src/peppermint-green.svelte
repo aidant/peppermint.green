@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Header from './components/header.svelte'
-  import Overview from './components/overview.svelte'
-  import Transactions from './components/transactions.svelte'
+  import Header from './containers/header.svelte'
+  import Overview from './containers/overview.svelte'
+  import Transactions from './containers/transactions.svelte'
 </script>
 
 <svelte:head>

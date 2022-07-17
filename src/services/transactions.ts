@@ -1,7 +1,6 @@
 import { openDB as createDatabase, type DBSchema as DatabaseSchema } from 'idb'
 import { combineLatest, from, of, scan, switchMap, type Observable } from 'rxjs'
 import { normalizeValue } from '../api'
-import { observeAccounts } from './accounts'
 import { createObservableNotification } from './create-observable-notification'
 import { getCurrencyConversion } from './currency-conversions'
 import { observeUserPreferences } from './user-preferences'
@@ -84,17 +83,15 @@ export const observeTransactions = (
 ): Observable<{ transactions: Record<string, Transaction>; updated: string[] }> => {
   return combineLatest([
     observeUserPreferences(),
-    observeAccounts(),
     observeTransactionsNotification('transactions:'),
   ]).pipe(
-    switchMap(([$userPreferences, $accounts]) =>
+    switchMap(([$userPreferences]) =>
       combineLatest({
         userPreferences: of($userPreferences),
-        accounts: of($accounts),
         transaction: from(getTransactions(filter)),
       })
     ),
-    switchMap(async ({ userPreferences, accounts, transaction }) => {
+    switchMap(async ({ userPreferences, transaction }) => {
       let multiplier: number | undefined
 
       if (transaction.transactionCurrency !== userPreferences.userCurrency) {
