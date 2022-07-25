@@ -1,8 +1,19 @@
-import { openDB as createDatabase, type DBSchema as DatabaseSchema } from 'idb'
-import { combineLatest, from, of, scan, switchMap, type Observable } from 'rxjs'
-import { normalizeValue } from '../api'
+import { openDB as createDatabase, type DBSchema as DatabaseSchema } from 'idb/with-async-ittr'
+import ease, { presets } from 'rx-ease'
+import {
+  animationFrameScheduler,
+  combineLatest,
+  from,
+  map,
+  of,
+  scan,
+  switchMap,
+  throttleTime,
+  type Observable,
+} from 'rxjs'
 import { createObservableNotification } from './create-observable-notification'
 import { getCurrencyConversion } from './currency-conversions'
+import { normalizeValue } from './normalize-value'
 import { observeUserPreferences } from './user-preferences'
 
 export interface Transaction {
@@ -67,20 +78,46 @@ export const getTransactions = async function* ({
   dateRangeStart,
   dateRangeEnd,
 }: TransactionFilter): AsyncGenerator<Transaction, void, unknown> {
-  const tx = db
-    .transaction('transactions', 'readonly', { durability: 'strict' })
-    .store.index('by-date-and-account')
+  const store = db.transaction('transactions', 'readonly', { durability: 'strict' }).store
 
-  for await (const cursor of tx.iterate(
-    IDBKeyRange.bound([dateRangeStart, accountId], [dateRangeEnd, accountId])
-  )) {
+  let tx
+
+  if (accountId && (dateRangeStart || dateRangeEnd)) {
+    tx = store.index('by-date-and-account')
+  } else if (accountId) {
+    tx = store.index('by-account')
+  } else if (dateRangeStart || dateRangeEnd) {
+    tx = store.index('by-date')
+  } else {
+    tx = store
+  }
+
+  let key = null
+
+  if (accountId && (dateRangeStart || dateRangeEnd)) {
+    key =
+      dateRangeStart && dateRangeEnd
+        ? IDBKeyRange.bound([dateRangeStart, accountId], [dateRangeEnd, accountId])
+        : dateRangeStart
+        ? IDBKeyRange.lowerBound([dateRangeStart, accountId])
+        : IDBKeyRange.upperBound([dateRangeEnd, accountId])
+  } else if (accountId) {
+    key = IDBKeyRange.only(accountId)
+  } else if (dateRangeStart || dateRangeEnd) {
+    key =
+      dateRangeStart && dateRangeEnd
+        ? IDBKeyRange.bound(dateRangeStart, dateRangeEnd)
+        : dateRangeStart
+        ? IDBKeyRange.lowerBound(dateRangeStart)
+        : IDBKeyRange.upperBound(dateRangeEnd)
+  }
+
+  for await (const cursor of tx.iterate(key)) {
     yield cursor.value
   }
 }
 
-export const observeTransactions = (
-  filter: TransactionFilter
-): Observable<{ transactions: Record<string, Transaction>; updated: string[] }> => {
+export const observeTransactions = (filter: TransactionFilter = {}): Observable<Transaction> => {
   return combineLatest([
     observeUserPreferences(),
     observeTransactionsNotification('transactions:'),
@@ -111,7 +148,14 @@ export const observeTransactions = (
         multiplier,
         precision: userPreferences.userPrecision,
       })
-    }),
+    })
+  )
+}
+
+export const observeTransactionsSummary = (
+  filter: TransactionFilter = {}
+): Observable<{ transactions: Record<string, Transaction>; updated: string[] }> => {
+  return observeTransactions(filter).pipe(
     scan<Transaction, { transactions: Record<string, Transaction>; updated: string[] }>(
       (value, transaction) => {
         return {
@@ -122,4 +166,56 @@ export const observeTransactions = (
       { transactions: {}, updated: [] }
     )
   )
+}
+
+export const observeTransactionsAmount = (
+  filter: TransactionFilter = {}
+): Observable<{
+  transactionAmount: number
+  transactionScale: number
+}> => {
+  return observeTransactions(filter).pipe(
+    scan<Transaction, number>((value, transaction) => {
+      return value + transaction.transactionDirection === 'out'
+        ? -transaction.transactionAmount
+        : transaction.transactionAmount
+    }, 0),
+    ease(...(presets.stiff as [number, number])),
+    throttleTime(1, animationFrameScheduler),
+    map((value) => ({ transactionAmount: value, transactionScale: 0 }))
+  )
+}
+
+export class TransactionNormalizerStream extends TransformStream<object, object> {
+  constructor() {
+    super({
+      transform(object: any, controller) {
+        const transaction: Omit<Transaction, 'transactionId'> = {
+          transactionDate: new Date(object['Date']),
+
+          transactionTitle: object['Merchant Name'],
+          transactionDescription: object['Transaction Details'],
+          transactionDisplayAmount: object['Amount'],
+
+          transactionCurrency: 'AUD',
+          transactionDirection: object['Amount'].startsWith('-') ? 'out' : 'in',
+          transactionAmount: Number(object['Amount'].replace(/[^0-9]/g, '')),
+          transactionScale: object['Amount'].replace(/[^0-9.]/g, '').split('.')[1].length,
+
+          accountId: object['Account Number'],
+        }
+        controller.enqueue(transaction)
+      },
+    })
+  }
+}
+
+export class TransactionWritableStream extends WritableStream<Transaction> {
+  constructor() {
+    super({
+      async write(transaction, controller) {
+        await createTransaction(transaction)
+      },
+    })
+  }
 }

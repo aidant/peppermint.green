@@ -1,4 +1,7 @@
-<script>
+<script lang="ts">
+  import type { SvelteComponent } from 'svelte'
+  import Dialog from '../components/dialog.svelte'
+  import FloatingActionButton from '../components/floating-action-button.svelte'
   import IconGoals from '../components/icon-goals.svelte'
   import IconIncomming from '../components/icon-incomming.svelte'
   import IconOutgoing from '../components/icon-outgoing.svelte'
@@ -9,9 +12,40 @@
   import TabsNavigationContainer from '../components/tabs-navigation-container.svelte'
   import TabsNavigation from '../components/tabs-navigation.svelte'
   import Tabs from '../components/tabs.svelte'
+  import { CSVDecoderStream, CSVObjectDecoderStream } from '../services/csv'
+  import { TransactionNormalizerStream, TransactionWritableStream } from '../services/transactions'
+  import ImportTransactions from './import-transactions.svelte'
+  import PageTransactions from './page-transactions.svelte'
+
+  let dialog: typeof SvelteComponent | null = null
+
+  const handleAction = () => {
+    dialog = ImportTransactions
+  }
+
+  const handleClose = () => {
+    dialog = null
+  }
+
+  const handleCSV = (event: CustomEvent<ReadableStream<Uint8Array>>) => {
+    dialog = null
+
+    event.detail
+      .pipeThrough(new TextDecoderStream())
+      .pipeThrough(new CSVDecoderStream())
+      .pipeThrough(new CSVObjectDecoderStream())
+      .pipeThrough(new TransactionNormalizerStream())
+      .pipeTo(new TransactionWritableStream())
+  }
 </script>
 
 <Tabs>
+  <FloatingActionButton on:click={handleAction} />
+  {#if dialog}
+    <Dialog on:close={handleClose}>
+      <svelte:component this={dialog} on:csv={handleCSV} />
+    </Dialog>
+  {/if}
   <TabsNavigationContainer>
     <TabsNavigation href="#incomming"><IconIncomming /></TabsNavigation>
     <TabsNavigation href="#transactions"><IconTransactions /></TabsNavigation>
@@ -39,31 +73,7 @@
       Incomming Incomming Incomming Incomming Incomming Incomming Incomming Incomming Incomming
     </TabsContent>
     <TabsContent id="transactions">
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions Transactions Transactions Transactions Transactions Transactions Transactions
-      Transactions
+      <PageTransactions />
     </TabsContent>
     <TabsContent id="outgoing">
       Outgoing Outgoing Outgoing Outgoing Outgoing Outgoing Outgoing Outgoing Outgoing Outgoing

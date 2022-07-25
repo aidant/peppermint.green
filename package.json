@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "idb": "^7.0.2",
+    "rx-ease": "^2.0.0",
     "rxjs": "^7.5.6"
   },
   "devDependencies": {
@@ -17,6 +18,8 @@
     "@tsconfig/svelte": "^3.0.0",
     "autoprefixer": "^10.4.7",
     "postcss": "^8.4.14",
+    "prettier": "^2.7.1",
+    "prettier-plugin-tailwindcss": "^0.1.12",
     "svelte": "^3.49.0",
     "svelte-check": "^2.8.0",
     "svelte-preprocess": "^4.10.7",

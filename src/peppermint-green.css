@@ -1,43 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500&family=Raleway:wght@400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* hsl(63, 53%, 92%) */
+/* hsl(86, 25%, 75%) */
+/* hsl(108, 17%, 59%) */
+/* hsl(120, 14%, 34%) */
+/* hsl(128, 16%, 10%) */
+
 :root {
-  --peppermint-green-hue: 130;
-  /* --peppermint-green-hue: 88; */
-  --peppermint-green-saturation: 15%;
-  --peppermint-green-lightest: 95%;
-  --peppermint-green-dark: 25%;
-  --peppermint-green-darkest: 10%;
+  --peppermint-green-hue-offset: 0;
 
-  --peppermint-green-color-lightest: hsl(
-    var(--peppermint-green-hue),
-    var(--peppermint-green-saturation),
-    var(--peppermint-green-lightest)
-  );
-
-  --peppermint-green-color-dark: hsl(
-    var(--peppermint-green-hue),
-    var(--peppermint-green-saturation),
-    var(--peppermint-green-dark)
-  );
-
-  --peppermint-green-color-darkest: hsl(
-    var(--peppermint-green-hue),
-    var(--peppermint-green-saturation),
-    var(--peppermint-green-darkest)
-  );
-
-  color: var(--peppermint-green-color-lightest);
-  background-color: var(--peppermint-green-color-darkest);
+  --peppermint-green-layer-4: hsl(calc(128 + var(--peppermint-green-hue-offset)), 16%, 10%);
+  --peppermint-green-layer-3: hsl(calc(120 + var(--peppermint-green-hue-offset)), 14%, 34%);
+  --peppermint-green-layer-2: hsl(calc(108 + var(--peppermint-green-hue-offset)), 17%, 59%);
+  --peppermint-green-layer-1: hsl(calc(86 + var(--peppermint-green-hue-offset)), 25%, 75%);
+  --peppermint-green-layer-0: hsl(calc(63 + var(--peppermint-green-hue-offset)), 53%, 92%);
 }
 
-.font-display {
-  font-family: 'Playfair Display', serif;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --peppermint-green-hue-offset: 0;
+    
+    --peppermint-green-layer-4: hsl(calc(63 + var(--peppermint-green-hue-offset)), 53%, 92%);
+    --peppermint-green-layer-3: hsl(calc(86 + var(--peppermint-green-hue-offset)), 25%, 75%);
+    --peppermint-green-layer-2: hsl(calc(108 + var(--peppermint-green-hue-offset)), 17%, 59%);
+    --peppermint-green-layer-1: hsl(calc(120 + var(--peppermint-green-hue-offset)), 14%, 34%);
+    --peppermint-green-layer-0: hsl(calc(128 + var(--peppermint-green-hue-offset)), 16%, 10%);
+  }
 }
 
-.peppermint-green-bg-dark {
-  background-color: var(--peppermint-green-color-dark);
+.peppermint-green-layer-4 {
+  color: var(--peppermint-green-layer-0);
+  background-color: var(--peppermint-green-layer-4);
+}
+
+.peppermint-green-layer-3 {
+  color: var(--peppermint-green-layer-0);
+  background-color: var(--peppermint-green-layer-3);
+}
+
+.peppermint-green-layer-2 {
+  color: var(--peppermint-green-layer-0);
+  background-color: var(--peppermint-green-layer-2);
+}
+
+.peppermint-green-layer-1 {
+  color: var(--peppermint-green-layer-4);
+  background-color: var(--peppermint-green-layer-1);
+}
+
+.peppermint-green-layer-0 {
+  color: var(--peppermint-green-layer-4);
+  background-color: var(--peppermint-green-layer-0);
 }

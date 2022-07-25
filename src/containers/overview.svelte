@@ -1,17 +1,15 @@
 <script lang="ts">
-  import { observeUserPreferences } from '../services/user-preferences'
+  import IntlNumber from '../components/intl-number.svelte'
+  import { observeTransactionsAmount } from '../services/transactions'
 
-  const userPreferences = observeUserPreferences()
-
-  const ammount = Math.random() * (69420 - 9001) + 9001
-  const ammountDisplay = new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency: $userPreferences.userCurrency,
-    currencyDisplay: 'narrowSymbol',
-  }).format(ammount)
+  const overview = observeTransactionsAmount()
 </script>
 
-<div class="w-full text-center text-6xl font-display lining-nums p-6 snap-start snap-always">
-  <span>{ammountDisplay}</span>
+<div
+  class="w-full snap-start snap-always p-6 text-center font-display text-6xl lining-nums tabular-nums"
+>
+  <span
+    ><IntlNumber value={$overview?.transactionAmount} scale={$overview?.transactionScale} /></span
+  >
   <div style="min-height: 128px" />
 </div>

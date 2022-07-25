@@ -4,7 +4,7 @@
 
 <div
   {id}
-  class="rounded-t-3xl peppermint-green-bg-dark snap-start overflow-y-auto overscroll-y-contain"
+  class="peppermint-green-layer-1 snap-start overflow-y-auto overscroll-y-contain rounded-t-3xl"
 >
   <slot />
 </div>

@@ -1,3 +1,3 @@
-<div class="flex flex-col flex-auto overflow-hidden relative">
+<div class="relative flex flex-auto flex-col overflow-hidden">
   <slot />
 </div>
